@@ -9,4 +9,5 @@ public interface OrderRepository {
     public Order get(int id);
     public Order get_from_queue();
     public Integer add(Order paymentRequest);
+    public Integer set_status(int id, int status);
 }

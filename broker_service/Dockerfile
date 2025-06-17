@@ -1,9 +1,9 @@
 FROM eclipse-temurin:21-jdk-jammy AS builder
 WORKDIR /app
-COPY api/.mvn/ .mvn
-COPY api/mvnw api/pom.xml ./
+COPY broker/.mvn/ .mvn
+COPY broker/mvnw broker/pom.xml ./
 RUN ./mvnw dependency:go-offline -B
-COPY api/src ./src
+COPY broker/src ./src
 RUN ./mvnw package -DskipTests -B
 FROM eclipse-temurin:21-jre-jammy
 WORKDIR /app
@@ -13,7 +13,7 @@ RUN if ! getent group springuser > /dev/null; then groupadd --system springuser;
     mkdir -p /home/springuser/saves && \
     chown -R springuser:springuser /home/springuser/saves
 USER springuser
-EXPOSE 8080
+EXPOSE 8083
 HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
-  CMD wget --quiet --tries=1 --spider http://localhost:8080/actuator/health || exit 1
+  CMD wget --quiet --tries=1 --spider http://localhost:8083/actuator/health || exit 1
 ENTRYPOINT ["java", "-jar", "/app/app.jar"]

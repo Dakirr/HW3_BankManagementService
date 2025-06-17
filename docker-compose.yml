@@ -1,33 +1,26 @@
 services:
-  # api-service:
-  #   build:
-  #     context: ./api_service 
-  #     dockerfile: Dockerfile
-  #   container_name: api-container
-  #   ports:
-  #     - "8082:8080" 
-  #   networks:
-  #     - microservices-net
-  #   depends_on:
-  #     storage-service:
-  #       condition: service_healthy
-  #     analisys-service:
-  #       condition: service_healthy
+  api-service:
+    build:
+      context: ./api_service 
+      dockerfile: Dockerfile
+    container_name: api-container
+    ports:
+      - "8080:8080" 
+    networks:
+      - microservices-net
 
-  # storage-service:
-  #   build:
-  #     context: ./storage_service
-  #     dockerfile: Dockerfile
-  #   container_name: storage-container
-  #   ports:
-  #     - "8080:8080" 
-  #   networks:
-  #     - microservices-net
-  #   depends_on:
-  #     postgres:
-  #       condition: service_healthy
-  #   volumes:
-  #     - storage_data:/home/springuser/saves
+  broker-service:
+    build:
+      context: ./broker_service 
+      dockerfile: Dockerfile
+    container_name: broker-container
+    ports:
+      - "8083:8080" 
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - microservices-net
 
   orders-service:
     build:
@@ -37,8 +30,6 @@ services:
     ports:
       - "8081:8080" 
     depends_on:
-      kafka:
-        condition: service_healthy
       postgres:
         condition: service_healthy
     networks:
@@ -52,8 +43,6 @@ services:
     ports:
       - "8082:8080" 
     depends_on:
-      kafka:
-        condition: service_healthy
       postgres:
         condition: service_healthy
     networks:
@@ -78,39 +67,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-
-  zookeeper:
-    image: confluentinc/cp-zookeeper:7.0.1 
-    container_name: zookeeper
-    networks:
-      - microservices-net
-    environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_TICK_TIME: 2000
-
-  kafka:
-    image: confluentinc/cp-kafka:7.0.1
-    container_name: kafka
-    networks:
-      - microservices-net
-    ports:
-      - "9092:9092" 
-    depends_on:
-      - zookeeper
-    environment:
-      KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_LOG4J_ROOT_LOGLEVEL: 'WARN'
-    healthcheck:
-      test: ["CMD-SHELL", "kafka-topics --bootstrap-server localhost:9092 --list > /dev/null || exit 1"]
-      interval: 15s
-      timeout: 10s
-      retries: 5
-      start_period: 30s # Give Kafka some time to start before checking
-
 
 volumes:
   postgres_data:

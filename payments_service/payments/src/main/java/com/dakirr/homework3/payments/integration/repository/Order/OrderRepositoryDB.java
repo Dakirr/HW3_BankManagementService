@@ -9,6 +9,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.dakirr.homework3.payments.domain.repository.OrderRepository;
 import com.dakirr.homework3.payments.domain.value_object.Order;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Repository
 public class OrderRepositoryDB implements OrderRepository {
@@ -16,6 +18,8 @@ public class OrderRepositoryDB implements OrderRepository {
     String table_data_name = "payment_request";
     String table_queue_name = "payment_request_queue";
     String bank_table_name = "bank_accounts";
+    private static final Logger logger = LoggerFactory.getLogger(OrderRepositoryDB.class);
+
 
     @Autowired
     public OrderRepositoryDB(JdbcTemplate jdbcTemplate) {
@@ -103,33 +107,53 @@ public class OrderRepositoryDB implements OrderRepository {
     @Override
     @Transactional
     public Integer add(Order paymentRequest) {
-        String check_exists_userId = "SELECT COUNT(id) FROM " + bank_table_name + " WHERE id = ?";
-        Integer count = jdbcTemplate.queryForObject(check_exists_userId, new Object[]{paymentRequest.getUserId()}, Integer.class);
-        
-        if (paymentRequest.getStatus() != 0) {
-            paymentRequest.setStatus(2);
-        }
-        if (count != 1) {
-            paymentRequest.setStatus(2);
-        }
-        
-        String insert_sql = "INSERT INTO " + table_data_name + " (id, user_id, amount, description, status) VALUES (?, ?, ?, ?, ?) RETURNING id";
-        Integer paymentRequestId = jdbcTemplate.queryForObject(
-            insert_sql, 
-            new Object[]{
-                paymentRequest.getId(), 
-                paymentRequest.getUserId(), 
-                paymentRequest.getAmount(), 
-                paymentRequest.getDescription(), 
-                paymentRequest.getStatus()
-            }, 
-            Integer.class
-        );
+        try {
+            String check_exists_userId = "SELECT COUNT(id) FROM " + bank_table_name + " WHERE id = ?";
+            Integer count = jdbcTemplate.queryForObject(check_exists_userId, new Object[]{paymentRequest.getUserId()}, Integer.class);
+            
+            if (paymentRequest.getStatus() != 0) {
+                paymentRequest.setStatus(2);
+            }
+            if (count != 1) {
+                paymentRequest.setStatus(2);
+            }
+            
+            String insert_sql = "INSERT INTO " + table_data_name + " (id, user_id, amount, description, status) VALUES (?, ?, ?, ?, ?)";
+            jdbcTemplate.update(
+                insert_sql, 
+                new Object[]{
+                    paymentRequest.getId(), 
+                    paymentRequest.getUserId(), 
+                    paymentRequest.getAmount(), 
+                    paymentRequest.getDescription(), 
+                    paymentRequest.getStatus()
+                }
+            );
 
-        String insert_queue_sql = "INSERT INTO " + table_queue_name + " (data_id) VALUES (?)";
-        jdbcTemplate.update(insert_queue_sql, paymentRequestId);
+            String insert_queue_sql = "INSERT INTO " + table_queue_name + " (data_id) VALUES (?)";        
+            Integer paymentRequestId = paymentRequest.getId();
+            jdbcTemplate.update(insert_queue_sql, paymentRequestId);
 
-        return paymentRequestId;
+            return paymentRequestId;
+            } catch (Exception e) {
+                logger.error("Database error while adding payment request for order ID: {}", e.getMessage(), e);
+                return null;
+            }
+    }
+
+    @Override
+    @Transactional
+    public Integer set_status(int id, int status) {
+        if (status != 0 && status != 1 && status != 2) {
+            return null;
+        }
+        try {
+            String sql = "UPDATE " + table_data_name + " SET status = ? WHERE id = ?";
+            jdbcTemplate.update(sql, status, id);
+            return id;
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
     }
 
     private static class QueueItem {

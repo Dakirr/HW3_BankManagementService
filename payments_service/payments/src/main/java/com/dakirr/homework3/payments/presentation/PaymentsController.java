@@ -11,11 +11,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.dakirr.homework3.payments.apllication.dto.BankAccountDTO;
-import com.dakirr.homework3.payments.apllication.service.BankAccountService;
-import com.dakirr.homework3.payments.apllication.service.OrderService;
+import com.dakirr.homework3.payments.application.dto.BankAccountDTO;
+import com.dakirr.homework3.payments.application.service.BankAccountService;
+import com.dakirr.homework3.payments.application.service.OrderService;
 import com.dakirr.homework3.payments.domain.value_object.BankAccount;
-import com.dakirr.homework3.payments.domain.value_object.Order;
 
 @RestController
 @RequestMapping("/payments")
@@ -51,31 +50,4 @@ public class PaymentsController {
         }
         return new ResponseEntity<>(null, HttpStatus.OK);
     }
-
-    @PostMapping("add/PaymentRequest")
-    public ResponseEntity<Integer> addPaymentRequest (@RequestBody Order paymentRequest) {
-        Integer id = paymentRequestService.add(paymentRequest);
-        if (id == null) {
-            return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
-        }
-        return new ResponseEntity<>(id, HttpStatus.CREATED);
-    }
-
-    @GetMapping("get/PaymentRequest/from_queue")
-    public ResponseEntity<Order> getPaymentRequestFromQueue () {
-        Order pr = paymentRequestService.get_from_queue();
-        if (pr == null) {
-            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
-        } 
-        return new ResponseEntity<>(pr, HttpStatus.OK);
-    }    
-
-    @GetMapping("get/PaymentRequest/{id}")
-    public ResponseEntity<Order> getPaymentRequest (@PathVariable int id) {
-        Order pr = paymentRequestService.get(id);
-        if (pr == null) {
-            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
-        }
-        return new ResponseEntity<>(pr, HttpStatus.OK);
-    }    
 }
