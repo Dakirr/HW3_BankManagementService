@@ -81,20 +81,32 @@ function base_json_conversion(InputBoxes, inputs) {
 
 
 let A = new JSON_input('Get BankAccount', [['id', 'int']], getBankAccount)
-let B = new JSON_input('Get Order', [['id', 'int']], getOrder, 300, 50)
-// let C = new JSON_input('Add BankAccount', [['balance', 'float'], ['currency', 'text']], addBankAccount, 550, 50)
-// let D = new JSON_input('Add Order', [['items', 'text'], ['total', 'float'], ['bankAccountId', 'int']], addOrder, 800, 50)
-// let E = new JSON_input('Update BankAccount', [['id', 'int'], ['delta', 'float']], updateBankAccount, 1050, 50)
+let B = new JSON_input('Get Order', [['id', 'int']], getOrder, 550, 50)
+let C = new JSON_input('Add BankAccount', [['id', 'int'], ['balance', 'float']], addBankAccount, 300, 50)
+let D = new JSON_input('Add Order', [['amount', 'float'], ['description', 'text'], ['userId', 'int']], addOrder, 800, 50)
+//let E = new JSON_input('Update BankAccount', [['id', 'int'], ['delta', 'float']], updateBankAccount, 1050, 50)
 
 function setup() {
     createCanvas(windowWidth, windowHeight);
     background(255);
+    let GROUP1 = createP("Bank Account Managment");
+    GROUP1.position(25 + 150, 10);
+    let GROUP2 = createP("Orders Managment");
+    GROUP2.position(25 + 170 + 500, 10);
+    rect(25, 50, 475, 500, 10);
+    rect(525, 50, 475, 500, 10);
     A.display();
     B.display();
-    // C.display();
-    // D.display();
-    // E.display();
+    C.display();
+    D.display();
+//    E.display();
 }
 
 function draw() {
+
 }
+
+function windowResized() {
+  
+}
+
