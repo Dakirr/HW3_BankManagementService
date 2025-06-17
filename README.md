@@ -2,7 +2,7 @@
 
 # 0. Сервисы
 
-- API service (http://localhost:8080/swagger-ui/index.html)
+- API service (http://localhost:8081/swagger-ui/index.html)
   - Api Controller: Перенаправляет запросы в Payments и Orders.
 - Payments service
   - Payments Controller: Отвечает за работу с банковскими аккаунтами и оплату заказов.
@@ -12,9 +12,10 @@
   - Messaging Controller: Отвечает за асинхронную отправку заказов в Broker Service.
 - Broker service
   - Broker Controller: Является очередью сообщений между Payments и Orders.
-- Frontend service
+- Frontend service (http://localhost:8080/)
   - Немного фронтенда. Работают геттеры и посттеры из API.
   - Доступен на http://localhost:8080/
+  - Должно выглядеть как-то так: https://github.com/user-attachments/assets/e4163f1c-f1f2-4a3c-86ad-384c7eb9e2f7
 
 # 1. Принцип работы 
 
