@@ -36,7 +36,6 @@ public class MessagingController {
     private final RestTemplate restTemplate;
     @Value("${broker.service.baseurl}") 
     private String brokerServiceBaseUrl;
-    private final Queue<Order> orderQueue = new LinkedList<>();
     private static final Logger logger = LoggerFactory.getLogger(MessagingController.class);
 
     @Autowired
@@ -49,9 +48,9 @@ public class MessagingController {
     @Transactional    
     @Scheduled(fixedRate = 5000)
     public void send() {
-        Order order;
-        if (!orderQueue.isEmpty()) {
-            order = orderQueue.poll();
+        Order order = orderService.get_from_inner_queue();
+        if (order != null) {
+            logger.info("Getting message from inner queue");
         } else {
             order = orderService.get_from_queue();
             if (order == null) {
@@ -74,10 +73,10 @@ public class MessagingController {
         try {
             ResponseEntity<String> response = restTemplate.postForEntity(url, order, String.class); 
             if (response.getStatusCode() != HttpStatus.OK) { 
-                orderQueue.add(order);
+                orderService.add_to_inner_queue(order);
             }
         } catch (RestClientException e) {
-            orderQueue.add(order);
+            orderService.add_to_inner_queue(order);
         }
         
     }

@@ -14,6 +14,8 @@ import org.springframework.web.client.RestTemplate;
 import com.dakirr.homework3.orders.application.service.OrderService;
 import com.dakirr.homework3.orders.domain.value_object.Order;
 
+import jakarta.transaction.Transactional;
+
 @RestController
 @RequestMapping("/messaging")
 public class MessagingController {
@@ -28,6 +30,7 @@ public class MessagingController {
     }
 
     @Scheduled(fixedRate = 5000)
+    @Transactional
     public void send() {
         Order order = orderService.get_from_queue();
         if (order != null) {

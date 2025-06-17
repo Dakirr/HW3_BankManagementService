@@ -20,6 +20,14 @@ public class OrderService {
     public Order get_from_queue() {
         return paymentRequestRepository.get_from_queue();
     }
+
+    public Integer add_to_inner_queue(Order order) {
+        return paymentRequestRepository.add_to_inner_queue(order);
+    }
+
+    public Order get_from_inner_queue() {
+        return paymentRequestRepository.get_from_inner_queue();
+    }
     
     public Integer add(Order paymentRequest) {
         return paymentRequestRepository.add(paymentRequest);

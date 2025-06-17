@@ -17,6 +17,7 @@ public class OrderRepositoryDB implements OrderRepository {
     private final JdbcTemplate jdbcTemplate;
     String table_data_name = "payment_request";
     String table_queue_name = "payment_request_queue";
+    String table_inner_queue_name = "payment_request_inner_queue";
     String bank_table_name = "bank_accounts";
     private static final Logger logger = LoggerFactory.getLogger(OrderRepositoryDB.class);
 
@@ -42,6 +43,16 @@ public class OrderRepositoryDB implements OrderRepository {
                                 "data_id INT REFERENCES " + table_data_name + "(id)" +
                                 ")";
         jdbcTemplate.execute(createQueueTableSql);
+
+        String createTableInnerQueueSql = "CREATE TABLE IF NOT EXISTS " + table_inner_queue_name +  
+                                " (" +
+                                "id INT PRIMARY KEY," +
+                                "user_id INT," +
+                                "amount DOUBLE PRECISION," +
+                                "description VARCHAR(255)," +
+                                "status INT NOT NULL CHECK (status IN (0, 1, 2))" +
+                                ")";
+        jdbcTemplate.execute(createTableInnerQueueSql);
     }
 
     @Override
@@ -172,5 +183,52 @@ public class OrderRepositoryDB implements OrderRepository {
         public int getDataId() {
             return dataId;
         }
+    }
+
+    public Integer add_to_inner_queue(Order order) {
+        try {
+            String insert_sql = "INSERT INTO " + table_data_name + " (id, user_id, amount, description, status) VALUES (?, ?, ?, ?, ?)";
+            jdbcTemplate.update(
+                insert_sql, 
+                new Object[]{
+                    order.getId(), 
+                    order.getUserId(), 
+                    order.getAmount(), 
+                    order.getDescription(), 
+                    order.getStatus()
+                }
+            );
+            return order.getId();
+        } catch (Exception e) {
+            return null;
+        }
+
+    }
+
+    public Order get_from_inner_queue() {
+        try {
+            String sql = "SELECT * FROM " + table_inner_queue_name + " ORDER BY id ASC LIMIT 1";
+            Order ret = jdbcTemplate.queryForObject(
+                sql, new Object[]{}, (rs, rowNum) -> {
+                    Order order = new Order (
+                        rs.getInt("id"), 
+                        rs.getInt("user_id"),
+                        rs.getDouble("amount"),
+                        rs.getString("description"),
+                        rs.getInt("status")
+                    );
+                    return order;
+                }
+            );
+            if (ret == null) {
+                return null;
+            }
+            String sql2 = "DELETE FROM " + table_inner_queue_name + " WHERE id = ?";
+            jdbcTemplate.update(sql2, ret.getId());
+            return ret;
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
+        
     }
 }

@@ -10,4 +10,6 @@ public interface OrderRepository {
     public Order get_from_queue();
     public Integer add(Order paymentRequest);
     public Integer set_status(int id, int status);
+    public Integer add_to_inner_queue(Order order);
+    public Order get_from_inner_queue();
 }
