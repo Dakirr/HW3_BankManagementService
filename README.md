@@ -12,7 +12,9 @@
   - Messaging Controller: Отвечает за асинхронную отправку заказов в Broker Service.
 - Broker service
   - Broker Controller: Является очередью сообщений между Payments и Orders.
- 
+- Frontend service
+  - Немного фронтенда. На данный момент работают геттеры из API, что дальше? Who knows.
+
 # 1. Принцип работы 
 
 Опишем принцип оплаты заказа, потому что это самое интересное:

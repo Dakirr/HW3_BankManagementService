@@ -1,11 +1,27 @@
 services:
+  frontend-service:
+    build:
+      context: ./frontend_service 
+      dockerfile: Dockerfile
+    container_name: frontend-container
+    ports:
+      - "8080:80" 
+    depends_on:
+      - api-service
+    networks:
+      - microservices-net
+      
+
   api-service:
     build:
       context: ./api_service 
       dockerfile: Dockerfile
     container_name: api-container
     ports:
-      - "8080:8080" 
+      - "8081:8080" 
+    depends_on:
+      - orders-service
+      - payments-service
     networks:
       - microservices-net
 
@@ -15,10 +31,11 @@ services:
       dockerfile: Dockerfile
     container_name: broker-container
     ports:
-      - "8083:8080" 
+      - "8084:8080" 
     depends_on:
-      postgres:
-        condition: service_healthy
+      - orders-service
+      - payments-service
+      - postgres
     networks:
       - microservices-net
 
@@ -28,7 +45,7 @@ services:
       dockerfile: Dockerfile
     container_name: orders-container
     ports:
-      - "8081:8080" 
+      - "8083:8080" 
     depends_on:
       postgres:
         condition: service_healthy
