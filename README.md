@@ -2,7 +2,7 @@
 
 # 0. Сервисы
 
-- API service
+- API service (http://localhost:8080/swagger-ui/index.html)
   - Api Controller: Перенаправляет запросы в Payments и Orders.
 - Payments service
   - Payments Controller: Отвечает за работу с банковскими аккаунтами и оплату заказов.
